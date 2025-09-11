@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/geist-sans.woff2") format("woff2");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/fonts/geist-mono.woff2") format("woff2");
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: "Geist", sans-serif;
+  --font-mono: "Geist Mono", monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-white font-sans text-pretty text-gray-800;
+  }
+  h1 {
+    @apply mb-6 pt-8 text-lg font-medium;
+  }
+  h2 {
+    @apply mt-8 mb-3 font-medium;
+  }
+  h3 {
+    @apply mt-8 mb-3 font-medium;
+  }
+  p {
+    @apply mb-6;
+  }
+  strong {
+    @apply font-medium;
+  }
+  ol {
+    @apply mb-6 list-decimal space-y-2 pl-5;
+  }
+  ul {
+    @apply mb-6 list-disc space-y-1 pl-5;
+  }
+  li {
+    @apply pl-1;
+  }
+  a {
+    @apply text-blue-500 hover:text-blue-700;
+  }
+  blockquote {
+    @apply mb-6 border-l-2 border-gray-300 pl-4 text-gray-500;
+  }
+  img,
+  video {
+  @apply mb-6 rounded-lg block mx-auto max-w-full h-auto;
+  }
+  kbd {
+    @apply rounded border border-b-2 border-gray-300 bg-gray-100 px-1 py-0.5 font-mono text-xs font-medium text-black;
+  }
+  :not(pre) > code {
+    @apply rounded border border-gray-300 bg-gray-200/50 px-1 py-0.5 font-mono text-sm font-medium text-black;
+  }
+  pre:has(code) {
+    @apply my-6 overflow-auto rounded-lg border border-gray-300 p-4 font-mono text-sm font-medium;
+  }
+  table {
+    @apply my-4 w-full table-auto border-collapse text-sm;
+    th {
+      @apply border-b p-4 text-left font-medium;
+    }
+    td {
+      @apply border-b bg-gray-50 p-4;
+    }
+  }
+}

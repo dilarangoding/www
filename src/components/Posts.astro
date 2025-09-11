@@ -1,0 +1,28 @@
+---
+import { getCollection } from "astro:content";
+import { formatDate } from "../lib/utils";
+
+interface Props {
+  limit?: number;
+}
+
+const { limit } = Astro.props as Props;
+
+const collection = await getCollection("posts");
+const posts = collection
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const list = typeof limit === "number" ? posts.slice(0, Math.max(0, limit)) : posts;
+---
+
+<ul>
+  {
+    list.map((post) => (
+      <li>
+        <a href={`/posts/${post.slug}`}>{post.data.title}</a>
+        <span class="hidden md:inline"> — {formatDate(post.data.date)}</span>
+      </li>
+    ))
+  }
+</ul>

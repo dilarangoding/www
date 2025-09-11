@@ -1,0 +1,26 @@
+---
+import { getCollection } from "astro:content";
+import { formatDate } from "../lib/utils";
+
+const items = (await getCollection("projects"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<ul>
+  {
+    items.map((p) => (
+      <li>
+        {
+          p.data.externalUrl ? (
+            <a href={p.data.externalUrl} target="_blank" rel="noopener noreferrer">{p.data.title}</a>
+          ) : (
+            <a href={`/projects/${p.slug}`}>{p.data.title}</a>
+          )
+        }
+        <span class="hidden md:inline"> — {formatDate(p.data.date)}</span>
+      </li>
+    ))
+  }
+
+</ul>

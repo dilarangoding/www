@@ -1,0 +1,35 @@
+---
+import { getCollection } from "astro:content";
+import Footer from "../../components/Footer.astro";
+import Link from "../../components/Link.astro";
+import PostLayout from "../../layouts/PostLayout.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts");
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: post,
+  }));
+}
+
+const post = Astro.props;
+const { Content } = await post.render();
+
+const wordsPerMinute = 200;
+const textLength = post.body.length;
+const words = textLength / 5;
+const readingTime = Math.max(1, Math.ceil(words / wordsPerMinute));
+---
+
+<PostLayout
+  title={post.data.title}
+  description={post.data.description}
+  date={post.data.date}
+  image={post.data.image}
+  readingTime={`${readingTime} minute read`}
+  slug={post.slug}
+  tags={post.data.tags}
+>
+  <Content components={{ a: Link }} />
+  <Footer slot="footer" date={post.data.date} />
+</PostLayout>
