@@ -1,26 +1,43 @@
 ---
-import { getCollection } from "astro:content";
-import { formatDate } from "../lib/utils";
+import { getCollection, type CollectionEntry } from "astro:content";
 
 const items = (await getCollection("projects"))
   .filter((p) => !p.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  .sort((a, b) => {
+    const aEnd = (p: CollectionEntry<'projects'>) => (p.data.ongoing ? new Date() : p.data.endDate ?? p.data.date).valueOf();
+    const bEnd = (p: CollectionEntry<'projects'>) => (p.data.ongoing ? new Date() : p.data.endDate ?? p.data.date).valueOf();
+    return bEnd(b) - aEnd(a);
+  });
+
+function toYearRange(p: typeof items[number]) {
+  const start = new Date(p.data.date);
+  const end = p.data.ongoing ? null : p.data.endDate ? new Date(p.data.endDate) : null;
+  const startY = start.getFullYear();
+  const endY = end ? end.getFullYear() : null;
+  if (p.data.ongoing) return `${startY}—`;
+  if (endY && endY !== startY) return `${startY}—${endY}`;
+  return `${startY}`;
+}
 ---
-
-<ul>
-  {
-    items.map((p) => (
-      <li>
-        {
-          p.data.externalUrl ? (
-            <a href={p.data.externalUrl} target="_blank" rel="noopener noreferrer">{p.data.title}</a>
-          ) : (
-            <a href={`/projects/${p.slug}`}>{p.data.title}</a>
-          )
-        }
-        <span class="hidden md:inline"> — {formatDate(p.data.date)}</span>
-      </li>
-    ))
-  }
-
-</ul>
+<div class="mt-8">
+  <div class="space-y-6">
+    {items.map((p) => (
+      <div class="border-t border-zinc-300/60 pt-4">
+        <div class="grid grid-cols-1 md:grid-cols-6 gap-4 items-baseline">
+          <div class="text-zinc-600 md:col-span-1 text-sm tabular-nums">
+            {toYearRange(p)}
+          </div>
+          <div class="md:col-span-5">
+            <div class="font-medium">
+              <a href={`/projects/${p.slug}`} class="underline text-zinc-800">{p.data.title}</a>
+            </div>
+            {p.data.summary && (
+              <p class="text-zinc-700 text-sm mt-1">{p.data.summary}</p>
+            )}
+          </div>
+        </div>
+      </div>
+    ))}
+    <div class="border-t border-zinc-300/60" />
+  </div>
+</div>

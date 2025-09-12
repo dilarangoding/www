@@ -1,0 +1,29 @@
+---
+import { getCollection } from "astro:content";
+import { formatMonthYear } from "../lib/utils";
+
+const items = (await getCollection("music"))
+  .filter((m) => !m.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<div class="music-list space-y-6">
+  {items.map((m) => (
+    <a href={`/music/${m.slug}`} class="block">
+      <div class="flex items-center gap-4">
+        <div class="shrink-0 h-20 w-20 min-w-[80px]">
+          <img src={m.data.image} alt={m.data.title} class="h-20 w-20 rounded-lg object-cover ring-1 ring-black/10 bg-gray-100 m-0" loading="lazy" />
+        </div>
+        <div class="flex-1">
+          <span class="underline">{m.data.title}</span><br />
+          <span class="text-sm text-zinc-600">{formatMonthYear(m.data.date)}</span>
+        </div>
+      </div>
+    </a>
+  ))}
+</div>
+
+<style>
+  .music-list img { margin: 0 !important; }
+  .music-list .text-zinc-600 { color: rgb(82 82 91); }
+</style>

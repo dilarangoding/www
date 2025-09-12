@@ -17,9 +17,22 @@ const projects = defineCollection({
   schema: z.object({
     title: z.string(),
     date: z.coerce.date(),
-    externalUrl: z.string().url().optional(),
+    endDate: z.coerce.date().optional(),
+    ongoing: z.boolean().default(false),
+    summary: z.string().optional(),
     draft: z.boolean().default(false),
   }),
 });
 
-export const collections = { posts, projects };
+const music = defineCollection({
+  type: "content",
+  schema: z.object({
+    title: z.string(),
+    date: z.coerce.date(),
+    image: z.string().default("/static/og.png"),
+    artist: z.string().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { posts, projects, music };

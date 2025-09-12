@@ -1,6 +1,5 @@
 ---
 import { getCollection } from "astro:content";
-import { formatDate } from "../lib/utils";
 
 interface Props {
   limit?: number;
@@ -14,15 +13,19 @@ const posts = collection
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const list = typeof limit === "number" ? posts.slice(0, Math.max(0, limit)) : posts;
----
 
-<ul>
-  {
-    list.map((post) => (
-      <li>
-        <a href={`/posts/${post.slug}`}>{post.data.title}</a>
-        <span class="hidden md:inline"> — {formatDate(post.data.date)}</span>
-      </li>
-    ))
-  }
-</ul>
+function ymd(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+---
+<div class="space-y-4">
+  {list.map((post) => (
+    <article >
+      <time datetime={post.data.date.toISOString()} class="block text-sm text-gray-600">{ymd(post.data.date)}</time>
+      <a href={`/posts/${post.slug}`} class="underline">{post.data.title}</a>
+    </article>
+  ))}
+</div>

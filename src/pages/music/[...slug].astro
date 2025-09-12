@@ -1,0 +1,26 @@
+---
+import { getCollection } from "astro:content";
+import Link from "../../components/Link.astro";
+import PostLayout from "../../layouts/PostLayout.astro";
+
+export async function getStaticPaths() {
+  const items = await getCollection("music");
+  return items
+    .filter((m) => !m.data.draft)
+    .map((m) => ({ params: { slug: m.slug }, props: m }));
+}
+
+const music = Astro.props as any;
+const { Content } = await music.render();
+---
+
+<PostLayout
+  title={music.data.title}
+  description={music.data.title}
+  date={music.data.date}
+  readingTime={undefined}
+  slug={music.slug}
+  showMeta={false}
+>
+  <Content components={{ a: Link }} />
+</PostLayout>
