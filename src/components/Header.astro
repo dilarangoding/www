@@ -9,7 +9,7 @@ const links: { name: string; href: string }[] = [
 
 <header>
   <nav class="flex gap-5">
-    <a href="/">
+    <a href="/" class="no-underline">
        <span>Home</span>
     </a>
     {
@@ -18,7 +18,7 @@ const links: { name: string; href: string }[] = [
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
-          class="group inline-flex items-center"
+          class="group inline-flex items-center no-underline"
         >
           <span>{link.name}</span>
         </a>

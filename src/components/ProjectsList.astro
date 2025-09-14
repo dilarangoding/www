@@ -28,9 +28,7 @@ function toYearRange(p: typeof items[number]) {
             {toYearRange(p)}
           </div>
           <div class="md:col-span-5">
-            <div class="font-medium">
-              <a href={`/projects/${p.slug}`} class="underline text-zinc-800">{p.data.title}</a>
-            </div>
+              <a href={`/projects/${p.slug}`} >{p.data.title}</a>
             {p.data.summary && (
               <p class="text-zinc-700 text-sm mt-1">{p.data.summary}</p>
             )}

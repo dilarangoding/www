@@ -1,29 +1,33 @@
 ---
 import { getCollection } from "astro:content";
-import { formatMonthYear } from "../lib/utils";
 
-const items = (await getCollection("music"))
-  .filter((m) => !m.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const all = await getCollection("music", ({ data }) => !data.draft);
+const items = all
+  .slice()
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+
+const monthYear = (d: string | Date) =>
+  new Date(d).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 ---
-
-<div class="music-list space-y-6">
-  {items.map((m) => (
-    <a href={`/music/${m.slug}`} class="block">
+<div class="space-y-6">
+  {
+    items.map(({ slug, data }) => (
       <div class="flex items-center gap-4">
-        <div class="shrink-0 h-20 w-20 min-w-[80px]">
-          <img src={m.data.image} alt={m.data.title} class="h-20 w-20 rounded-lg object-cover ring-1 ring-black/10 bg-gray-100 m-0" loading="lazy" />
-        </div>
+        <a
+          href={`/music/${slug}`}
+          class="block shrink-0 h-20 w-20 min-w-[80px] overflow-hidden rounded-lg ring-1 ring-zinc-200 bg-zinc-100"
+        >
+          <img src={data.image} alt={data.title} class="h-full w-full object-cover m-0" loading="lazy" />
+        </a>
         <div class="flex-1">
-          <span class="underline">{m.data.title}</span><br />
-          <span class="text-sm text-zinc-600">{formatMonthYear(m.data.date)}</span>
+          <a href={`/music/${slug}`} class="underline text-black hover:text-black">
+            {data.title}
+          </a>
+          <div class="text-sm text-zinc-600">
+            {monthYear(data.date)}
+          </div>
         </div>
       </div>
-    </a>
-  ))}
+    ))
+  }
 </div>
-
-<style>
-  .music-list img { margin: 0 !important; }
-  .music-list .text-zinc-600 { color: rgb(82 82 91); }
-</style>
