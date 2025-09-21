@@ -1,4 +1,3 @@
-import rss from "@astrojs/rss";
 import { getCollection } from "astro:content";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 
@@ -19,46 +18,59 @@ export async function GET(context) {
     const rawBody = post.body || "";
     const html = absolutifyUrls(renderMarkdown(rawBody), siteUrl);
     const pub = toValidDate(post.data.date);
-
     return {
       title: post.data.title,
       description: post.data.description || extractExcerpt(rawBody),
       link: url,
       guid: url,
       pubDate: pub,
-      author: "Riyon Aryono",
+      author: "hello@riyonaryono.me (Riyon Aryono)",
       categories: Array.isArray(post.data.tags) ? post.data.tags : [],
       enclosure: toEnclosure(post.data.image, siteUrl),
       content: html,
     };
   });
 
-  return rss({
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    site: siteUrl,
-    language: "id-ID",
-    managingEditor: "hello@riyonaryono.me (Riyon Aryono)",
-    webMaster: "hello@riyonaryono.me (Riyon Aryono)",
-    copyright: `Copyright ${new Date().getFullYear()} Riyon Aryono`,
-    generator: "Astro RSS",
-    ttl: 60,
-    image: {
-      url: `${siteUrl}favicon.ico`,
-      title: SITE_TITLE,
-      link: siteUrl,
-    },
-    items,
-    customData: `
-      <atom:link href="${siteUrl}rss.xml" rel="self" type="application/rss+xml" />
-      <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
-      <docs>https://www.rssboard.org/rss-specification</docs>
-    `,
-    xmlns: {
-      atom: "http://www.w3.org/2005/Atom",
-      content: "http://purl.org/rss/1.0/modules/content/",
-    },
-  });
+  const itemsXml = items
+    .map((it) => {
+      const cats = it.categories.map((c) => `<category>${escapeXml(c)}</category>`).join("");
+      const enc = it.enclosure ? `<enclosure url="${it.enclosure.url}" type="${it.enclosure.type}" length="${it.enclosure.length || 0}"/>` : "";
+      return [
+        "<item>",
+        `<title>${escapeXml(it.title)}</title>`,
+        `<link>${it.link}</link>`,
+        `<guid isPermaLink="true">${it.guid}</guid>`,
+        `<description><![CDATA[${cdata(it.description || "")}]]></description>`,
+        `<pubDate>${formatIso8601(it.pubDate, "Asia/Jakarta")}</pubDate>`,
+        cats,
+        enc,
+        `<content:encoded><![CDATA[${cdata(it.content || "")}]]></content:encoded>`,
+        "</item>",
+      ].join("");
+    })
+    .join("\n");
+
+  const xml = [
+    `<?xml version="1.0" encoding="UTF-8"?>`,
+    `<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">`,
+    `<channel>`,
+    `<title>${escapeXml(SITE_TITLE)}</title>`,
+    `<link>${siteUrl}</link>`,
+    `<description>${escapeXml(SITE_DESCRIPTION)}</description>`,
+    `<language>id-ID</language>`,
+    `<managingEditor>hello@riyonaryono.me (Riyon Aryono)</managingEditor>`,
+    `<webMaster>hello@riyonaryono.me (Riyon Aryono)</webMaster>`,
+    `<generator>Astro RSS</generator>`,
+    `<ttl>60</ttl>`,
+    `<atom:link href="${siteUrl}rss.xml" rel="self" type="application/rss+xml"/>`,
+    `<lastBuildDate>${formatIso8601(new Date(), "Asia/Jakarta")}</lastBuildDate>`,
+    `<image><url>${siteUrl}favicon.ico</url><title>${escapeXml(SITE_TITLE)}</title><link>${siteUrl}</link></image>`,
+    itemsXml,
+    `</channel>`,
+    `</rss>`,
+  ].join("");
+
+  return new Response(xml, { headers: { "Content-Type": "text/xml; charset=UTF-8" } });
 }
 
 function ensureTrailingSlash(u) {
@@ -68,6 +80,35 @@ function ensureTrailingSlash(u) {
 function toValidDate(d) {
   const dt = d instanceof Date ? d : new Date(d);
   return isNaN(dt.getTime()) ? new Date() : dt;
+}
+
+function formatIso8601(date, timeZone = "UTC") {
+  const d = toValidDate(date);
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  })
+    .formatToParts(d)
+    .reduce((acc, p) => ((acc[p.type] = p.value), acc), {});
+  const offset = getTzOffsetISO(d, timeZone);
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}${offset}`;
+}
+
+function getTzOffsetISO(date, timeZone) {
+  try {
+    const tzPart = new Intl.DateTimeFormat("en-US", { timeZone, timeZoneName: "longOffset" })
+      .formatToParts(date)
+      .find((x) => x.type === "timeZoneName")?.value;
+    const m = tzPart && tzPart.match(/GMT([+-]\d{2}):?(\d{2})/);
+    if (m) return `${m[1]}:${m[2]}`;
+  } catch {}
+  return "+00:00";
 }
 
 function extractExcerpt(body, maxLength = 200) {
@@ -80,9 +121,7 @@ function extractExcerpt(body, maxLength = 200) {
     .replace(/[#>*_~`-]/g, "")
     .replace(/\n+/g, " ")
     .trim();
-  return text.length > maxLength
-    ? text.substring(0, maxLength).replace(/\s+\S*$/, "") + "..."
-    : text;
+  return text.length > maxLength ? text.substring(0, maxLength).replace(/\s+\S*$/, "") + "..." : text;
 }
 
 function renderMarkdown(md) {
@@ -162,6 +201,14 @@ function renderMarkdown(md) {
 
 function escapeHtml(s) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+function escapeXml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function cdata(s) {
+  return String(s).replace(/]]>/g, "]]]]><![CDATA[>");
 }
 
 function absolutifyUrls(html, siteUrl) {
