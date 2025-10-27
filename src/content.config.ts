@@ -5,9 +5,10 @@ const posts = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
-    date: z.coerce.date(),
+    pubDate: z.coerce.date(),
+    lastUpdate: z.coerce.date().optional(),
     image: z.string().default("/static/og.png"),
-  tags: z.array(z.string()).default([]),
+    tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
   }),
 });
@@ -16,23 +17,15 @@ const projects = defineCollection({
   type: "content",
   schema: z.object({
     title: z.string(),
-    date: z.coerce.date(),
+    description: z.string(),
+    pubDate: z.coerce.date(),
     endDate: z.coerce.date().optional(),
     ongoing: z.boolean().default(false),
-    summary: z.string().optional(),
-    draft: z.boolean().default(false),
-  }),
-});
-
-const music = defineCollection({
-  type: "content",
-  schema: z.object({
-    title: z.string(),
-    date: z.coerce.date(),
     image: z.string().default("/static/og.png"),
-    artist: z.string().optional(),
+    url: z.string().optional(),
+    tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
   }),
 });
 
-export const collections = { posts, projects, music };
+export const collections = { posts, projects };

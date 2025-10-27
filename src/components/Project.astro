@@ -1,0 +1,59 @@
+---
+import { getCollection } from "astro:content";
+
+const projects = (await getCollection("projects"))
+    .filter((p: any) => !p.data.draft)
+    .sort((a: any, b: any) => {
+        const aEnd = a.data.ongoing
+            ? new Date()
+            : (a.data.endDate ?? a.data.pubDate);
+        const bEnd = b.data.ongoing
+            ? new Date()
+            : (b.data.endDate ?? b.data.pubDate);
+        return bEnd.valueOf() - aEnd.valueOf();
+    });
+
+function toYearRange(project: any) {
+    const startYear = project.data.pubDate.getFullYear();
+
+    if (project.data.ongoing) {
+        return `${startYear}—`;
+    }
+
+    if (project.data.endDate) {
+        const endYear = project.data.endDate.getFullYear();
+        if (endYear !== startYear) {
+            return `${startYear}—${endYear}`;
+        }
+    }
+
+    return `${startYear}`;
+}
+---
+
+<div class="mt-8">
+    <div class="space-y-6">
+        {
+            projects.map((project: any) => (
+                <div class="border-t border-zinc-300/60 pt-4">
+                    <div class="grid grid-cols-1 md:grid-cols-6 gap-4 items-baseline">
+                        <div class="text-zinc-600 md:col-span-1 text-sm tabular-nums">
+                            {toYearRange(project)}
+                        </div>
+                        <div class="md:col-span-5">
+                            <a href={`/${project.slug}`}>
+                                {project.data.title}
+                            </a>
+                            {project.data.description && (
+                                <p class="text-zinc-700 text-sm mt-1">
+                                    {project.data.description}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            ))
+        }
+        <div class="border-t border-zinc-300/60"></div>
+    </div>
+</div>

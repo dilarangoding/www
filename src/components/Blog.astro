@@ -1,0 +1,41 @@
+---
+import { getCollection } from "astro:content";
+
+const { limit } = Astro.props;
+
+const posts = (await getCollection("posts"))
+    .filter((post: any) => !post.data.draft)
+    .sort(
+        (a: any, b: any) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+    );
+
+const list = limit ? posts.slice(0, limit) : posts;
+
+function formatDate(date: any) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+}
+---
+
+<div class="space-y-3">
+    {
+        list.map((post: any) => (
+            <article class="flex items-baseline justify-between gap-8">
+                <a
+                    href={`/${post.slug}`}
+                    class="hover:opacity-70 transition-opacity no-underline flex-1"
+                >
+                    {post.data.title}
+                </a>
+                <time
+                    datetime={post.data.pubDate.toISOString()}
+                    class="text-gray-500 text-sm tabular-nums flex-shrink-0"
+                >
+                    {formatDate(post.data.pubDate)}
+                </time>
+            </article>
+        ))
+    }
+</div>

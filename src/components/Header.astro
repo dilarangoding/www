@@ -1,35 +1,16 @@
----
-const links: { name: string; href: string }[] = [
-  { name: "Github", href: "https://github.com/dilarangoding" },
-  { name: "Email", href: "mailto:hello@riyonaryono.me" },
-  { name: "LinkedIn", href: "https://www.linkedin.com/in/riyonaryono/" },
-  { name: "RSS", href: "/rss.xml" },
-];
----
-
-<header>
-  <nav class="flex gap-5">
-    <a href="/" class="no-underline">
-       <span>Home</span>
-    </a>
-    {
-      links.map((link) => (
-        <a
-          href={link.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="group inline-flex items-center no-underline"
-        >
-          <span>{link.name}</span>
-        </a>
-      ))
-    }
-  </nav>
+<header class="flex justify-between">
+    <nav>
+        <a href="/" class="font-semibold text-lg">Riyon Aryono</a>
+    </nav>
+    <div class="flex gap-6 text-sm">
+        <a href="/blog">Blog</a>
+        <a href="mailto:hello@riyonaryono.me">Email</a>
+    </div>
 </header>
 
 <style>
-  @reference "../styles/global.css";
-  a {
-    @apply text-gray-500 hover:text-gray-800;
-  }
+    @reference "../styles/global.css";
+    a {
+        @apply no-underline hover:text-black transition-colors;
+    }
 </style>

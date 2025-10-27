@@ -1,24 +1,26 @@
 ---
 const links: { name: string; href: string }[] = [
-  { name: "Posts", href: "/posts" },
-  { name: "Projects", href: "/projects" },
-  { name: "Music", href: "/music" },
-  { name: "Now", href: "/now" },
+    { name: "Blog", href: "/blog" },
+    { name: "Projects", href: "/projects" },
+    { name: "Uses", href: "/uses" },
+    { name: "Now", href: "/now" },
+    { name: "Blogroll", href: "/blogroll" },
+    { name: "Books", href: "/books" },
 ];
 ---
 
-<footer class="mt-16">
-  <div class="flex justify-center gap-5">
-    {
-      links.map((link) => (
-        <a
-          href={link.href}
-          rel="noopener noreferrer"
-          class="no-underline group inline-flex items-center text-gray-500 hover:text-gray-800"
-        >
-          <span>{link.name}</span>
-        </a>
-      ))
-    }
-  </div>
+<footer class="mt-16 pt-8">
+    <div class="flex justify-center gap-5">
+        {
+            links.map((link) => (
+                <a
+                    href={link.href}
+                    rel="noopener noreferrer"
+                    class="no-underline group inline-flex items-center text-gray-500 hover:text-black transition-colors"
+                >
+                    <span>{link.name}</span>
+                </a>
+            ))
+        }
+    </div>
 </footer>

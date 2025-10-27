@@ -1,0 +1,52 @@
+---
+import Layout from "./Layout.astro";
+
+const {
+    title,
+    description,
+    pubDate,
+    endDate,
+    ongoing = false,
+    url,
+    slug,
+} = Astro.props;
+
+function toYearRange() {
+    const startY = pubDate.getFullYear();
+    const endY = endDate ? endDate.getFullYear() : null;
+    if (ongoing) return `${startY}—present`;
+    if (endY && endY !== startY) return `${startY}—${endY}`;
+    return `${startY}`;
+}
+---
+
+<Layout title={title} description={description || title}>
+    <article class="space-y-8">
+        <header class="space-y-3">
+            <h1 class="text-2xl font-bold">{title}</h1>
+            <div class="text-xs font-mono text-gray-600">
+                {toYearRange()}
+                {
+                    url && (
+                        <span>
+                            {" "}
+                            •{" "}
+                            <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="hover:text-gray-900"
+                            >
+                                Visit Project →
+                            </a>
+                        </span>
+                    )
+                }
+            </div>
+        </header>
+
+        <div class="post-content max-w-none">
+            <slot />
+        </div>
+    </article>
+</Layout>
